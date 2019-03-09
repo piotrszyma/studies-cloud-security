@@ -3,10 +3,10 @@
 import random
 import hashlib
 
-from charm.core.math.integer import integer
+from charm.core.math.integer import integer  # pylint: disable=no-name-in-module
 from charm.toolbox.integergroup import IntegerGroupQ
 
-from utils import Poly, LIexp
+from utils import Poly, lagrange_interpolate
 
 SECURITY_PARAM = 5
 G = IntegerGroupQ()
@@ -49,6 +49,10 @@ def tag_block(secret_key, block):
   sub_blocks_with_tags = [(message, generated_poly(message)) for message in block]
   return sub_blocks_with_tags
 
+def tag_blocks(secret_key, message):
+  for block in message:
+    yield tag_block(secret_key, block)
+
 def gen_challenge(secret_key, block_id):
   Lf = poly(secret_key, block_id)
   r = G.random()
@@ -57,12 +61,21 @@ def gen_challenge(secret_key, block_id):
   H = (g**r, xc, g ** (r * Lf(integer(0, G.q))))
   return Kf, H
 
+def gen_challenges(secret_key, block_ids):
+  for block_id in block_ids:
+    yield gen_challenge(secret_key, block_id)
+
 def gen_proof(challenge, blocks_with_tags):
   g_r, xc, g_lf0 = challenge
   interpolation_set = [(integer(0, G.q), g_lf0)] + [(message, g_r ** tag)
                         for message, tag in blocks_with_tags]
-  Pf = LIexp(xc, interpolation_set)
+  Pf = lagrange_interpolate(xc, interpolation_set)
   return Pf
+
+def gen_proofs(challenges, blocks_of_subblocks_with_tags):
+  for challenge, blocks_with_tags in zip(challenges,
+                                         blocks_of_subblocks_with_tags):
+    yield gen_proof(challenge, blocks_with_tags)
 
 def main():
   message = [[integer(random.randrange(0, G.q), G.q) for _ in range(NUM_OF_SUBBLOCKS)]
