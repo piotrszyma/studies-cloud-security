@@ -13,7 +13,7 @@ G = IntegerGroupQ()
 G.paramgen(SECURITY_PARAM)
 g = G.randomG()
 SECRET_KEY = G.random()
-NUM_OF_BLOCKS = 1
+NUM_OF_BLOCKS = 4
 NUM_OF_SUBBLOCKS = 4
 z = NUM_OF_SUBBLOCKS
 
@@ -81,13 +81,27 @@ def main():
   message = [[integer(random.randrange(0, G.q), G.q) for _ in range(NUM_OF_SUBBLOCKS)]
              for _ in range(NUM_OF_BLOCKS)]
   print('Message generated.')
-  t = tag_block(SECRET_KEY, message[0])
+  # t = tag_block(SECRET_KEY, message[0])
+  # print('Tags generated.')
+  # Kf, H = gen_challenge(SECRET_KEY, ID(message[0]))
+
+  # Pf = gen_proof(H, t)
+  # print('Proof generated.')
+  # assert Kf == Pf
+  tags = tag_blocks(SECRET_KEY, message) # [t, ...]
   print('Tags generated.')
-  Kf, H = gen_challenge(SECRET_KEY, ID(message[0]))
-  print('Challenge generated.')
-  Pf = gen_proof(H, t)
-  print('Proof generated.')
-  assert Kf == Pf
+  Kfs_Hs = tuple(gen_challenges(SECRET_KEY, (ID(block) for block in message))) # [(Kf, H), ...]
+  print('Challenges generated.')
+  Kfs = tuple(K for K, _ in Kfs_Hs)
+  Hs = tuple(H for _, H in Kfs_Hs)
+  Pfs = gen_proofs(Hs, tags)
+  print('Proofs generated.')
+  for Kf, Pf in zip(Kfs, Pfs):
+    assert Kf == Pf
+  print('Validated!')
+
+
+
 
 if __name__ == '__main__':
   main()
