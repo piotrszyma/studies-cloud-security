@@ -1,6 +1,4 @@
 """Implementation of Oblivious Transfer 1 of n protocol."""
-import random
-
 from charm.core.math.integer import integer  # pylint: disable=no-name-in-module
 from charm.toolbox.integergroup import IntegerGroupQ
 
@@ -8,7 +6,7 @@ NUMBER_OF_MESSAGES = 5
 SECURITY_PARAM = 20
 G = IntegerGroupQ()
 G.paramgen(SECURITY_PARAM)
-g = integer(G.randomGen(), G.q)
+g = G.randomGen()
 
 def main():
   # A got messages.
@@ -18,14 +16,15 @@ def main():
   # A sends Rs to B.
 
   # B chooses random Alpha & index k
-  k = random.choice(range(len(msgs)))
+  # k = random.choice(range(len(msgs)))
+  k = 0
   alpha = G.random()
   X = Rs[k] ** alpha
   # B sends X to A.
 
   # A calculates Ws.
   ws = [X ** (1/rs_i) for rs_i in rs]
-  zs = [m_i * w_i for m_i, w_i in zip(msgs, ws)]
+  zs = [(m_i * w_i) % G.q for m_i, w_i in zip(msgs, ws)]
   # A sends cs to B.
 
   # B checks message.
