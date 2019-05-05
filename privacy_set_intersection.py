@@ -43,4 +43,4 @@ def main():
   assert a_common == b_common == common
 
 if __name__ == "__main__":
-    main()
+  main()
