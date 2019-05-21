@@ -79,7 +79,7 @@ def main():
 
   # print(R_0)
   # print(P_alpha)
-  print(R_0 == P_alpha)
+  assert R_0 == P_alpha
 
   # R = lambda x: Q(x, S(x))
 
