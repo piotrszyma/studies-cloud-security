@@ -46,7 +46,8 @@ def fast_exp(a: int, n: int, m: int, delays=False) -> int:
 
 a = 2
 n = random.randint(128, 255)
-m = 20988936657440586486151264256610222593863921
+print(f'Random number to find is... {n}')
+m = 630899156147664284829166865938701721337
 
 
 start = time.time()
@@ -63,7 +64,3 @@ for perm in perms:
   if result == fast_exp(a, num, m):
     print(f"Found number: {num}")
     break
-  # if num == n:
-  #   print(f"Found number: {num}")
-  #   print(perm)
-  #   break
