@@ -67,15 +67,15 @@ def main():
   random.shuffle(T)
   T = T[:n]
 
-  # Reciver defines N values yi, for 1 ≤ i ≤ N. The value yi is defined as
+  # Receiver defines N values yi, for 1 ≤ i ≤ N. The value yi is defined as
   # S(xi) if i is in T, and is a random value if F otherwise.
-
   # The receiver sends the N points (Y) to the sender
   Y = [(x, S(x) if i in T else G.random()) for i, x in enumerate(X)]
   Qs = [(x, Q(x, y)) for x, y in Y]
 
   # Receiver calculates values.
-  R_values = [x for i, x in enumerate(Qs) if i in T]
+  # Filters out all values that got Q(x, S(x)) != y.
+  R_values = [(x, y) for x, y in Qs if Q(x, S(x)) == y]
   R_0 = LI(integer(0, G.q), R_values)
   P_alpha = P(alpha)
 
