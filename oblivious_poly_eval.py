@@ -74,8 +74,7 @@ def main():
   Qs = [(x, Q(x, y)) for x, y in Y]
 
   # Receiver calculates values.
-  # Filters out all values that got Q(x, S(x)) != y.
-  R_values = [(x, y) for x, y in Qs if Q(x, S(x)) == y]
+  R_values = [v for i, v in enumerate(Qs) if i in T]
   R_0 = LI(integer(0, G.q), R_values)
   P_alpha = P(alpha)
 
