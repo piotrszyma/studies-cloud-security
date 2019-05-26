@@ -34,22 +34,21 @@ g = G.randomGen()
 k = 4
 m = 4
 d_p = 12 # Degree of P
-# d = d_p * k # Degree of P_x
+d = d_p * k  # Degree of P_x
 
 def main():
-  # Receier has alpha.
+  # Receiver has alpha.
   alpha = G.random()
 
   # Sender has polynomial P.
   P = Poly([G.random() for _ in range(d_p + 1)])
 
   # Sender generates random masking poly P_x
-  P_x = Poly([G.random() for _ in range(d_p * k + 1)])
+  P_x = Poly([G.random() for _ in range(d + 1)])
   P_x[0] = integer(0, G.q) # To hold assumption that P_x(0) == 0
 
   # Sender defines bivariate polynomial Q(x, y).
   # deg(Q) == deg(P_x) == d == d_p * k
-
   Q = lambda x, y: reduce_modulus(P_x(x) + P(y))
 
   # Receiver hides alpha in a univariate polynomial.
@@ -57,23 +56,26 @@ def main():
   S = Poly([G.random() for _ in range(k + 1)])
   S[0] = alpha
 
+  # The receiver sets n = dR + 1 = d + 1 = kdP + 1 and chooses N = nm distinct random
+  # values x1, . . . , xN ∈ F, all different from 0.
   n = k * d_p + 1
   N = n * m
-
-
   X = [G.random() for _ in range(N)]
 
-  # Random indices.
+  # The receiver chooses a random set T of n indices 1 ≤ i1, i2, . . . , in ≤ N.
   T = list(range(N))
   random.shuffle(T)
   T = T[:n]
 
-  Y = [(x, S(x) if i in T else G.random()) for i, x in enumerate(X)]
+  # Reciver defines N values yi, for 1 ≤ i ≤ N. The value yi is defined as
+  # S(xi) if i is in T, and is a random value if F otherwise.
 
+  # The receiver sends the N points (Y) to the sender
+  Y = [(x, S(x) if i in T else G.random()) for i, x in enumerate(X)]
   Qs = [(x, Q(x, y)) for x, y in Y]
 
+  # Receiver calculates values.
   R_values = [x for i, x in enumerate(Qs) if i in T]
-
   R_0 = LI(integer(0, G.q), R_values)
   P_alpha = P(alpha)
 

@@ -20,24 +20,6 @@ z = NUM_OF_SUBBLOCKS
 def ID(block):
   return hashlib.sha512(str(block).encode('utf-8')).hexdigest()
 
-# def setup(security_param=1024):
-#   """Setup defines system parameters for a user.
-
-#   1. Choose G supgroup of Zp* of order q, s. t. q, p are prime, q | p - 1
-#     and DLP is hard to G
-#   2. SKc <-- r Zq
-
-#   Args:
-#     security_param: minmum number of bits of q.
-
-#   Returns:
-#     Master secret key SKc of the user.
-#   """
-#   group.paramgen(security_param)
-#   secret_key = group.random()
-#   return secret_key
-
-
 def poly(secret_key, block_id):
   """Yields an secret polynomial Lf over Zq for a given block f."""
   random.seed(str(secret_key) + block_id)
@@ -80,15 +62,15 @@ def gen_proofs(challenges, blocks_of_subblocks_with_tags):
 def main():
   message = [[integer(random.randrange(0, G.q), G.q) for _ in range(NUM_OF_SUBBLOCKS)]
              for _ in range(NUM_OF_BLOCKS)]
-  print('Message generated.')
+  # Message generated.
   tags = tag_blocks(SECRET_KEY, message) # [t, ...]
-  print('Tags generated.')
+  # Tags generated.
   Kfs_Hs = tuple(gen_challenges(SECRET_KEY, (ID(block) for block in message))) # [(Kf, H), ...]
-  print('Challenges generated.')
+  # Challenges generated.
   Kfs = tuple(K for K, _ in Kfs_Hs)
   Hs = tuple(H for _, H in Kfs_Hs)
   Pfs = gen_proofs(Hs, tags)
-  print('Proofs generated.')
+  # Proofs generated.
   for Kf, Pf in zip(Kfs, Pfs):
     assert Kf == Pf
   print('Validated!')
