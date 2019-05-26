@@ -6,7 +6,7 @@ import hashlib
 from charm.core.math.integer import integer  # pylint: disable=no-name-in-module
 from charm.toolbox.integergroup import IntegerGroupQ
 
-from utils import Poly, lagrange_interpolate
+from utils import Poly, LI_exp
 
 SECURITY_PARAM = 5
 G = IntegerGroupQ()
@@ -69,7 +69,7 @@ def gen_proof(challenge, blocks_with_tags):
   g_r, xc, g_lf0 = challenge
   interpolation_set = [(integer(0, G.q), g_lf0)] + [(message, g_r ** tag)
                         for message, tag in blocks_with_tags]
-  Pf = lagrange_interpolate(xc, interpolation_set)
+  Pf = LI_exp(xc, interpolation_set)
   return Pf
 
 def gen_proofs(challenges, blocks_of_subblocks_with_tags):
@@ -81,13 +81,6 @@ def main():
   message = [[integer(random.randrange(0, G.q), G.q) for _ in range(NUM_OF_SUBBLOCKS)]
              for _ in range(NUM_OF_BLOCKS)]
   print('Message generated.')
-  # t = tag_block(SECRET_KEY, message[0])
-  # print('Tags generated.')
-  # Kf, H = gen_challenge(SECRET_KEY, ID(message[0]))
-
-  # Pf = gen_proof(H, t)
-  # print('Proof generated.')
-  # assert Kf == Pf
   tags = tag_blocks(SECRET_KEY, message) # [t, ...]
   print('Tags generated.')
   Kfs_Hs = tuple(gen_challenges(SECRET_KEY, (ID(block) for block in message))) # [(Kf, H), ...]

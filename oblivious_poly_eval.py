@@ -22,7 +22,7 @@ import random
 
 from charm.toolbox.integergroup import IntegerGroupQ
 from charm.core.math.integer import integer
-from charm.core.math.integer import reduce as reduce_int
+from charm.core.math.integer import reduce as reduce_modulus
 from utils import Poly, LI
 
 
@@ -49,7 +49,8 @@ def main():
 
   # Sender defines bivariate polynomial Q(x, y).
   # deg(Q) == deg(P_x) == d == d_p * k
-  Q = lambda x, y: reduce_int(P_x(x) + P(y))
+
+  Q = lambda x, y: reduce_modulus(P_x(x) + P(y))
 
   # Receiver hides alpha in a univariate polynomial.
   # deg(S) == k
@@ -67,30 +68,16 @@ def main():
   random.shuffle(T)
   T = T[:n]
 
-
   Y = [(x, S(x) if i in T else G.random()) for i, x in enumerate(X)]
 
   Qs = [(x, Q(x, y)) for x, y in Y]
 
   R_values = [x for i, x in enumerate(Qs) if i in T]
 
-  R_0 = LI(R_values, integer(0, G.q))
+  R_0 = LI(integer(0, G.q), R_values)
   P_alpha = P(alpha)
 
-  # print(R_0)
-  # print(P_alpha)
   assert R_0 == P_alpha
-
-  # R = lambda x: Q(x, S(x))
-
-  # X = [G.random() for _ in range(d_p * k + 1)]
-  # R_X = [R(x) for x in X]
-  # R_0 = lagrange_interpolate(integer(0, G.q), zip(X, R_X))
-  # P_alpha = P(alpha)
-
-  # assert R_0 == P_alpha
-
-
 
 
 if __name__ == "__main__":

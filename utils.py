@@ -1,7 +1,8 @@
 """Util methods."""
 
 import functools
-from charm.core.math.integer import reduce as reduce_int
+import operator
+from charm.core.math.integer import reduce as reduce_modulus
 
 class Poly:
   """Polynomial
@@ -22,23 +23,21 @@ class Poly:
   def __getitem__(self, attr):
     return self.coeffs[attr]
 
-def product(iterable):
-  return functools.reduce(lambda x, y: x * y, iterable)
+def product_modulus(iterable):
+  return functools.reduce(operator.mul, iterable)
 
-def lagrange_interpolate(argument, interpolation_set):
-  return product((
-      grtag ** (product(
+def sum_modulus(A):
+  return functools.reduce(operator.add, A)
+
+def LI(argument, interpolation_set):
+  return reduce_modulus(sum_modulus(
+      yj * product_modulus((argument - xm) / (xj - xm) for xm, _ in interpolation_set if xm != xj)
+      for xj, yj in interpolation_set
+  ))
+
+def LI_exp(argument, interpolation_set):
+  return product_modulus((
+      grtag ** (product_modulus(
           (argument - m_prim) / (m - m_prim)
           for m_prim, _ in interpolation_set if m_prim != m))
   ) for m, grtag in interpolation_set)
-
-# TODO: Fix the function above!
-
-def sum(A):
-  return functools.reduce(lambda x, y: x + y, A)
-
-def LI(points, xc):
-  return reduce_int(sum([
-      yj * product([(xc - xm) / (xj - xm) for xm, _ in points if xm != xj])
-      for xj, yj in points
-  ]))
