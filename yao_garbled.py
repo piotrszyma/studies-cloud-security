@@ -22,30 +22,56 @@ def decrypt(k1, k2, c2):
   return m
 
 keys = dict((k, random_bytes(128)) for k in ['A_0', 'A_1', 'B_0', 'B_1', 'C_0', 'C_1'])
-Alice_keys = {k: v for k, v in keys.items() if 'A' in k}
-Bob_keys = {k: v for k, v in keys.items() if 'B' in k}
 
+# Random input of Bob.
+Alice_index = random.choice(['A_0', 'A_1'])
+Alice_key = keys[Alice_index]
 
-Table = [
+# Random input (Bob chooses) of Bob
+Bob_index = random.choice(['B_0', 'B_1'])
+Bob_key = keys[Bob_index]
+
+# A garbled table is being created that obfuscates the truth table.
+#
+#   F: (A, B) -> C
+#
+#  #=================#
+#  |  A  |  B  |  C  |
+#  #=================#
+#  |  0  |  0  |  0  |
+#  |  0  |  1  |  0  |
+#  |  1  |  0  |  0  |
+#  |  1  |  1  |  1  |
+#  #=================#
+# Parties don't trust each other but want to get value C based on their A & B.
+
+values_mapping = {
+    (keys['A_0'], keys['B_0']): keys['C_0'],
+    (keys['A_0'], keys['B_1']): keys['C_0'],
+    (keys['A_1'], keys['B_0']): keys['C_0'],
+    (keys['A_1'], keys['B_1']): keys['C_1'],
+}
+
+# A garbled circuit is being generated that masks function F.
+garbled_table = [
     encrypt(keys['A_0'], keys['B_0'], keys['C_0']),
     encrypt(keys['A_0'], keys['B_1'], keys['C_0']),
     encrypt(keys['A_1'], keys['B_0'], keys['C_0']),
     encrypt(keys['A_1'], keys['B_1'], keys['C_1'])
 ]
+random.shuffle(garbled_table)
 
-random.shuffle(Table)
+print(f'Alice has chosen {Alice_index}')
+print(f'Bob has chosen {Bob_index}')
 
-Alice_A = random.choice(tuple(Alice_keys.values()))
-Bob_B = random.choice(tuple(Bob_keys.values()))
-
-print(f'Alice has chosen {Alice_A}')
-print(f'Bob has chosen {Bob_B}')
-
-
-# for i, t in enumerate(Table):
-#   try:
-#     a = decrypt(Alice_A, Bob_b, t)
-#   except UnicodeDecodeError:
-#     pass
-#   else:
-#     print(a == keys['C_0'])
+# They can get only single value at that interesting point.
+for t in garbled_table:
+  try:
+    a = decrypt(Alice_key, Bob_key, t)
+    if a == values_mapping[(Alice_key, Bob_key)]:
+      print(f'Valid value of F({Alice_index}, {Bob_index}) found.')
+      break
+  except UnicodeDecodeError:
+    pass
+else:
+  print('Valid value not found...')
